@@ -10,10 +10,11 @@ or check the Notion website https://fuchsia-sardine-dbc.notion.site/Ai-1c0c64105
 以 ROS2、Docker、DDS 安全通訊為核心設計。
 
 | 路徑 | 功能說明 |
-| `launch/| 一鍵啟動 GUI + Token 驗證 + DDS + 指紋 SDK |
-| `src/` | 所有 ROS2 節點（PyQt GUI、GPIO 測試、UART 指紋、相機錄影） |
-| `dds_security/` | DDS 安全憑證（governance.xml、permissions.xml、cert.pem 等） |
-| `records/` | 登入成功後的錄影影片儲存目錄（會自動建立） |
+
+1. launch/ >> 一鍵啟動 GUI + Token 驗證 + DDS + 指紋 SDK |
+2. src/ >> 所有 ROS2 節點（PyQt GUI、GPIO 測試、UART 指紋、相機錄影） |
+3. dds_security/>> DDS 安全憑證（governance.xml、permissions.xml、cert.pem 等） |
+4. records/>> 登入成功後的錄影影片儲存目錄（會自動建立） |
 
 # 解壓並進入專案資料夾
 
