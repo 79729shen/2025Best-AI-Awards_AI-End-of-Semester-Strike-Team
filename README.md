@@ -5,6 +5,9 @@
 For the complete development data, please refer to the file 2025-YOLOV8無人偵查車-開發總資料.zip on GitHub, 
 or check the Notion website https://fuchsia-sardine-dbc.notion.site/Ai-1c0c6410541b8040a663c21301536917
 
+# 無人偵查車避障功能展示:
+https://youtu.be/JkV125E-7Qs
+
 # ros2_security_pi5_runtime.zip 使用說明:
 
 以 ROS2、Docker、DDS 安全通訊為核心設計。
