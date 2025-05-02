@@ -12,27 +12,134 @@ https://youtu.be/JkV125E-7Qs
 
 以 ROS2、Docker、DDS 安全通訊為核心設計。
 
-| 路徑 | 功能說明 |
+# 使用說明 – ROS2 DDS-Security 指紋驗證系統整合包
 
-1. launch/ >> 一鍵啟動 GUI + Token 驗證 + DDS + 指紋 SDK |
-2. src/ >> 所有 ROS2 節點（PyQt GUI、GPIO 測試、UART 指紋、相機錄影） |
-3. dds_security/>> DDS 安全憑證（governance.xml、permissions.xml、cert.pem 等） |
-4. records/>> 登入成功後的錄影影片儲存目錄（會自動建立） |
+適用對象：
 
-# 解壓並進入專案資料夾
+本系統適用於使用 Raspberry Pi 5 或 Linux 環境，結合指紋驗證與 ROS2 DDS-Security 資安傳輸場景，如門禁控制、自主設備啟動、機器人授權啟動等。
 
-unzip ros2_security_pi5_runtime.zip
-cd ros2_security_ws
+ 一、安裝套件方式（適用於 Raspberry Pi）
+ 安裝 `.deb` 套件
+```bash
+sudo dpkg -i ros2-dds-secure-fingerprint_1.0.0_all.deb
+```
 
-# 安裝相依套件（第一次執行）
+安裝後會在：
+```
+/opt/ros2-dds-secure-fingerprint/
+```
+# 二、一鍵執行系統
 
-sudo apt update && sudo apt install python3-pyqt5 python3-opencv python3-colcon-common-extensions python3-pip -y
-pip3 install pyserial
+指令：
+```bash
+cd /opt/ros2-dds-secure-fingerprint/scripts
+./run_all.sh
+```
+會執行：
 
-# 編譯並啟動系統
+1. 指紋驗證
+2. 成功則產生 CN 憑證
+3. 自動產生 XML 權限
+4. 啟動 ROS2 加密節點（pub/sub）
+5. 上傳紀錄到 API
 
-colcon build
-source install/setup.bash
-ros2 launch launch secure_layers.launch.py
+---
 
- 完成後會自動打開 GUI、啟動指紋模組、Token 驗證、GPIO 測試、相機錄影功能。
+# 三、systemd 自動啟動（可選）
+# 安裝服務
+```bash
+sudo cp ros2_dds_secure.service /etc/systemd/system/
+sudo systemctl daemon-reexec
+sudo systemctl enable ros2_dds_secure.service
+sudo systemctl start ros2_dds_secure.service
+```
+
+---
+
+# 四、Docker 部署（跨平台）
+
+# 1.解壓並建置映像
+
+```bash
+unzip ros2_dds_secure_docker_context.zip
+cd ros2_dds_secure_docker
+docker build -t ros2-dds-secure .
+```
+
+# 2.執行容器（含 UART）
+
+```bash
+docker run --rm -it --device=/dev/ttyAMA0 ros2-dds-secure
+```
+---
+
+# 五、指紋模組接線說明（Waveshare）
+
+| 模組腳位 | 功能            | Raspberry Pi GPIO 對應 |
+| ---- | ------------- | -------------------- |
+| VIN  | 電源 3.3V       | Pin 1                |
+| GND  | 地             | Pin 6                |
+| TX   | 模組 TX → Pi RX | GPIO15 / Pin 10      |
+| RX   | 模組 RX ← Pi TX | GPIO14 / Pin 8       |
+| RST  | 休眠控制          | GPIO24 / Pin 18      |
+| WAKE | 喚醒偵測          | GPIO23 / Pin 16      |
+
+# 六、Log API 上傳格式（驗證紀錄）
+
+每筆驗證結果會 POST 至 API，例如：
+
+```json
+{
+  "timestamp": "2025-05-03 14:00:00",
+  "user_id": "CN=User1",
+  "status": "success",
+  "device": "ros2-dds-secure",
+  "match_code": 0
+}
+```
+
+# 修改位置：
+請修改 `fingerprint_uart_verify.py` 中的：
+
+```python
+API_URL = "https://your-api-server.com/api/log"
+```
+---
+
+# 七、加密通訊設定（DDS-Security）
+
+| 項目     | 設定                              |
+| ------ | ------------------------------- |
+| 加密演算法  | AES-GCM                         |
+| 驗證演算法  | SHA-256                         |
+| 憑證格式   | X.509 (RSA 2048 bit)            |
+| 身份控管   | 依 CN=UserX 自動建立 permissions.xml |
+| 公開話題範圍 | 限定於 `secure_topic`，僅授權節點能收發     |
+
+---
+
+# 八、驗證流程摘要
+
+```plaintext
+1. 指紋比對成功
+↓
+2. 自動建立 CN=UserX 憑證
+↓
+3. 自動建立/更新 XML 權限
+↓
+4. 啟動 ROS2 加密節點（talker 或 listener）
+↓
+5. 上傳驗證紀錄到 API
+```
+
+---
+
+# 📁 附加說明：
+
+1. 可在 `/opt/ros2-dds-secure-fingerprint/security/` 中放置自己的 CA 憑證 (`ca.key.pem`, `ca.cert.pem`)
+2. 可擴充不同 CN 對應不同話題（限制 `/camera`, `/cmd_vel` 等）
+3. 若需 GPIO 控制開門、蜂鳴器、LED 可後續加入
+
+---
+
+
