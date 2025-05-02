@@ -8,11 +8,8 @@ or check the Notion website https://fuchsia-sardine-dbc.notion.site/Ai-1c0c64105
 # 無人偵查車避障功能展示:
 https://youtu.be/JkV125E-7Qs
 
-# ros2_security_pi5_runtime.zip 使用說明:
-
+# 使用說明 – ros2_dds_secure_final_package 指紋驗證系統整合包
 以 ROS2、Docker、DDS 安全通訊為核心設計。
-
-# 使用說明 – ROS2 DDS-Security 指紋驗證系統整合包
 
 適用對象：
 
@@ -134,7 +131,7 @@ API_URL = "https://your-api-server.com/api/log"
 
 ---
 
-# 📁 附加說明：
+# 附加說明：
 
 1. 可在 `/opt/ros2-dds-secure-fingerprint/security/` 中放置自己的 CA 憑證 (`ca.key.pem`, `ca.cert.pem`)
 2. 可擴充不同 CN 對應不同話題（限制 `/camera`, `/cmd_vel` 等）
